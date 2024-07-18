@@ -16,10 +16,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@radix-ui/react-dropdown-menu";
 import Link from "next/link";
-// import useAuthStore from "@/hooks/useAuth";
-// import registerUser from "@/actions/register";
-// import { startSession } from "@/lib/session";
+import useAuthStore from "@/hooks/useAuth";
 import { useToast } from "@/components/ui/use-toast";
+import registerUser from "@/actions/register";
+import { startSession } from "@/lib/session";
+import { Loader2Icon } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   username: z.string().min(2, {
@@ -34,8 +36,9 @@ const formSchema = z.object({
 });
 
 const CreateUser = () => {
-  //   const { loader, setLoader } = useAuthStore();
+  const { loader, setLoader } = useAuthStore();
   const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -46,18 +49,31 @@ const CreateUser = () => {
     },
   });
 
-  //   const onSubmit = (data: z.infer<typeof formSchema>) => {
-  //     setLoader(true);
-  //     registerUser(data.username, data.email, data.password).then((resp) => {
-  //       startSession(resp.user, resp.jwt);
-  //       toast({
-  //         // variant: "success",
-  //         title: "accounct created",
-  //       });
-  //     });
-  //   };
-
-  const onSubmit = () => {};
+  const onSubmit = (data: z.infer<typeof formSchema>) => {
+    setLoader(true);
+    registerUser(data.username, data.email, data.password)
+      .then(
+        (resp) => {
+          startSession(resp.user, resp.jwt);
+          toast({
+            variant: "success",
+            title: "accounct created",
+          });
+          setLoader(false);
+          router.push("/");
+        },
+        (error) => {
+          setLoader(false);
+          toast({
+            variant: "destructive",
+            title: "something went wrong",
+          });
+        }
+      )
+      .finally(() => {
+        setLoader(false);
+      });
+  };
 
   return (
     <Form {...form}>
@@ -108,7 +124,11 @@ const CreateUser = () => {
         />
 
         <Button className="w-full" type="submit">
-          Submit
+          {loader ? (
+            <Loader2Icon className="animate-spin" />
+          ) : (
+            "create an account"
+          )}
         </Button>
       </form>
       <div className="mt-8">

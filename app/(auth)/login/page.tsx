@@ -16,6 +16,13 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@radix-ui/react-dropdown-menu";
 import Link from "next/link";
+import { Loader2Icon } from "lucide-react";
+import useAuthStore from "@/hooks/useAuth";
+import { useToast } from "@/components/ui/use-toast";
+
+import { startSession } from "@/lib/session";
+import loginUser from "@/actions/login";
+import { useRouter } from "next/navigation";
 
 const formSchema = z.object({
   email: z.string().min(2, {
@@ -27,6 +34,10 @@ const formSchema = z.object({
 });
 
 const LoginPage = () => {
+  const { loader, setLoader } = useAuthStore();
+  const { toast } = useToast();
+  const router = useRouter();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -35,7 +46,31 @@ const LoginPage = () => {
     },
   });
 
-  const onSubmit = () => {};
+  const onSubmit = (data: z.infer<typeof formSchema>) => {
+    setLoader(true);
+    loginUser(data.email, data.password)
+      .then(
+        (resp) => {
+          startSession(resp.user, resp.jwt);
+          toast({
+            variant: "success",
+            title: "accounct created",
+          });
+          setLoader(false);
+          router.push("/");
+        },
+        (error) => {
+          setLoader(false);
+          toast({
+            variant: "destructive",
+            title: "something went wrong",
+          });
+        }
+      )
+      .finally(() => {
+        setLoader(false);
+      });
+  };
 
   return (
     <Form {...form}>
@@ -71,7 +106,7 @@ const LoginPage = () => {
         />
 
         <Button className="w-full" type="submit">
-          Submit
+          {loader ? <Loader2Icon className="animate-spin" /> : "Login"}
         </Button>
       </form>
       <div className="mt-8">
