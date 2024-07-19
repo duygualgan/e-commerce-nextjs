@@ -8,6 +8,11 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import NavSkeleton from "./Skeleton/NavSkeleton";
+import Autoplay from "embla-carousel-autoplay";
+import Link from "next/link";
+import Image from "next/image";
+import SliderSkeleton from "./Skeleton/SliderSkeleton";
 
 const Slider = () => {
   const [sliders, setSliders] = useState([]);
@@ -30,15 +35,43 @@ const Slider = () => {
 
   return (
     <div>
-      <Carousel>
-        <CarouselContent>
-          <CarouselItem>...</CarouselItem>
-          <CarouselItem>...</CarouselItem>
-          <CarouselItem>...</CarouselItem>
-        </CarouselContent>
-        <CarouselPrevious />
-        <CarouselNext />
-      </Carousel>
+      {loading ? (
+        <SliderSkeleton />
+      ) : (
+        <Carousel
+          opts={{
+            align: "start",
+            loop: true,
+          }}
+          plugins={[
+            Autoplay({
+              delay: 3000,
+            }),
+          ]}
+        >
+          <CarouselContent>
+            {sliders.map((slider) => (
+              <CarouselItem>
+                <Link href={slider.attributes.url} key={slider.id}>
+                  <Image
+                    alt="slider"
+                    unoptimized={true}
+                    src={
+                      process.env.NEXT_PUBLIC_BACKEND_URL +
+                      slider?.attributes?.media?.data?.attributes?.url
+                    }
+                    width={500}
+                    height={300}
+                    className="w-full h-[200px] md:h-[450px] object-cover"
+                  />
+                </Link>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious className="left-0" />
+          <CarouselNext className="right-0" />
+        </Carousel>
+      )}
     </div>
   );
 };
