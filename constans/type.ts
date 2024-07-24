@@ -45,8 +45,8 @@ export type Product={
         name:string
         description:string
         slug:string
-        mrp:Number
-        sellingPrice:Number
+        mrp:number
+        sellingPrice:number
         isTop:boolean
         recent:boolean
         images:ProductImage[]
