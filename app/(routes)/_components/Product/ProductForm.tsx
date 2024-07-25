@@ -12,10 +12,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Loader2Icon, Minus, PlusIcon } from "lucide-react";
 import Link from "next/link";
-// import { AddToCart } from '@/actions/cart/addToCart';
 import { useToast } from "@/components/ui/use-toast";
-// import useCartStore from '@/hooks/useCartStore';
 import { useRouter } from "next/navigation";
+import { AddToCart } from "@/actions/cart/addToCart";
+import useCartStore from "@/hooks/useCartStore";
 
 interface ProductForm {
   product: Product;
@@ -24,7 +24,7 @@ interface ProductForm {
 const ProductForm = ({ product, btnVisible }: ProductForm) => {
   const [loading, setLoading] = useState(false);
 
-  // const fetchItems = useCartStore((state)=>state.fetchItems);
+  const fetchItems = useCartStore((state) => state.fetchItems);
   const router = useRouter();
 
   const { toast } = useToast();
